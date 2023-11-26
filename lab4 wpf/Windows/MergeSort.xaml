@@ -1,0 +1,96 @@
+﻿<Window x:Class="lab4_wpf.Windows.MergeSort"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:lab4_wpf.Windows"
+        mc:Ignorable="d"
+        Title="MergeSort" Height="1080" Width="1920">
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="{x:Static DataGrid.FocusBorderBrushKey}" Color="#FF000000"/>
+        <Style x:Key="DataGridCellStyle1" TargetType="{x:Type DataGridCell}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
+                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static DataGrid.FocusBorderBrushKey}}"/>
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsSelected" Value="true"/>
+                        <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}}"/>
+                </MultiTrigger>
+                <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                </Trigger>
+
+                <Trigger Property="IsSelected"  Value="True">
+                    <Setter Property="Background" Value="Red"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid Name="GridVisual">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.6*"/>
+            <ColumnDefinition Width="0.6*"/>
+            <ColumnDefinition Width="0.6*"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Steps control:" HorizontalAlignment="Center"/>
+        <Button Width="60" Height="30" Content="Previous" Click="PrevStep"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="33,40,0,0" RenderTransformOrigin="0.66,-3.419" />
+        <Button Width="60" Height="30" Content="Next" Click="NextStep" Name="nextStepButton"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="142,40,0,0" RenderTransformOrigin="1.493,0.448" />
+
+
+        <DataGrid CellStyle="{DynamicResource DataGridCellStyle1}" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  Grid.Column="1" Name="Array"
+                  >
+        </DataGrid>
+        <ListBox HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="2" Name="dataGrids">
+            <DataGrid CellStyle="{DynamicResource DataGridCellStyle1}" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  Grid.Column="2" Name="TempArray">
+            </DataGrid>
+            
+            <DataGrid CellStyle="{DynamicResource DataGridCellStyle1}" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  Grid.Column="2" Name="TempArray1">
+            </DataGrid>
+        </ListBox>
+
+
+
+        <Button Width="90" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0 90 0 0"
+                Grid.Column="3" Content="EnterData" Click="EnterData"/>
+
+        <ListBox Grid.Column="3" Margin="0 130 0 0" Name="DescList"
+            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+
+        <TextBlock Text="Введите числа:" Grid.Column="3"
+            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <TextBox Grid.Column="3" Height="30" Width="200" Name="dataText"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 40 0 0"/>
+
+    </Grid>
+</Window>

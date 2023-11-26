@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RootNamespace>lab4_wpf</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Porter2Stemmer" Version="1.0.0" />
+    <PackageReference Include="Porter2StemmerStandard" Version="1.1.0" />
+    <PackageReference Include="PorterStemmer" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
