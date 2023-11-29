@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:lab4_wpf.Windows"
+		Closing="ClearWindow"
         mc:Ignorable="d"
         Title="ExchangeSort" Height="450" Width="1200">
-	<Window.Resources>
+    <Window.Resources>
 
 		<SolidColorBrush x:Key="{x:Static DataGrid.FocusBorderBrushKey}" Color="#FF000000"/>
 		<Style x:Key="DataGridCellStyle1" TargetType="{x:Type DataGridCell}">
@@ -79,5 +80,13 @@
 		<TextBox Grid.Column="2" Height="30" Width="200" Name="dataText"
                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 40 0 0"/>
 
-	</Grid>
+        <TextBlock Text="Enter delay(ms):" Height="30"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="34,152,0,0" Grid.ColumnSpan="2" Width="86"/>
+        <TextBox Width="87" Height="30" Name="Delay"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="33,177,0,0" Grid.ColumnSpan="2"/>
+        <Button Width="60" Height="30" Content="Pause" Click="Button_Click"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="33,222,0,0" />
+        <Button x:Name="Start" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Height="30" Content="Start"
+                Click="Start_Click" Margin="150,222,0,0" Grid.Column="0"/>
+    </Grid>
 </Window>

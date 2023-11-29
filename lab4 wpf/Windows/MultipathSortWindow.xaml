@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:lab4_wpf.Windows"
         mc:Ignorable="d"
+        Closing="ClearWindow"
         Title="MultipathSortWindow" Height="1080" Width="1920">
     <Window.Resources>
 
@@ -86,5 +87,13 @@
         <TextBox Grid.Column="3" Height="30" Width="200" Name="dataText"
                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 40 0 0"/>
 
+        <TextBlock Text="Enter delay(ms):" Height="30"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="34,152,0,0" Grid.ColumnSpan="2" Width="86"/>
+        <TextBox Width="87" Height="30" Name="Delay"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="33,177,0,0" Grid.ColumnSpan="2"/>
+        <Button Width="60" Height="30" Content="Pause" Click="Button_Click"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="33,222,0,0" />
+        <Button x:Name="Start" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Height="30" Content="Start"
+                Click="Start_Click" Margin="142,222,0,0" Grid.Column="0"/>
     </Grid>
 </Window>

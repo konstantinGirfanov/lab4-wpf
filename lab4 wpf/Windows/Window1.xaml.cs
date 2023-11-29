@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Xml.Linq;
 
 namespace lab4_wpf
@@ -16,13 +18,20 @@ namespace lab4_wpf
     /// 
     public partial class Window1 : Window
     {
-        private static List<Step> Steps = new();
-        private static ObservableCollection<Value> Data = new();
-        private static int CurrentOperation = 0;
-        private static List<int> DataForSort = new();
+        private static List<Step> Steps;
+        private static ObservableCollection<Value> Data;
+        private static int CurrentOperation;
+        private static List<int> DataForSort;
+        private static bool Stop { get; set; } = false;
+        private static bool Pause { get; set; } = false;
 
         public Window1()
         {
+            Steps = new();
+            Data = new();
+            CurrentOperation = 0;
+            DataForSort = new();
+
             InitializeComponent();
             Array.ItemsSource = Data;
             Array.SelectionUnit = DataGridSelectionUnit.Cell;
@@ -41,7 +50,7 @@ namespace lab4_wpf
 
         private void NextStep(object sender, RoutedEventArgs e)
         {
-            if(CurrentOperation != Steps.Count)
+            if (CurrentOperation != Steps.Count)
             {
                 DoAction(Steps[CurrentOperation]);
                 CurrentOperation++;
@@ -72,11 +81,11 @@ namespace lab4_wpf
                     break;
             }
         }
-        
+
         private void SelectItems(int[] indexes)
         {
             Array.SelectedCells.Clear();
-            foreach(int index in indexes)
+            foreach (int index in indexes)
             {
                 DataGridCellInfo newCell = new(Array.Items[index], Array.Columns[1]);
                 Array.SelectedCells.Add(newCell);
@@ -94,6 +103,7 @@ namespace lab4_wpf
 
         private void EnterData(object sender, RoutedEventArgs e)
         {
+            Stop = false;
             DescList.Items.Clear();
             CurrentOperation = 0;
             Data.Clear();
@@ -114,10 +124,10 @@ namespace lab4_wpf
 
         private void PrevStep(object sender, RoutedEventArgs e)
         {
-            if(CurrentOperation - 1 != 0)
+            if (CurrentOperation - 1 != 0)
             {
                 CurrentOperation--;
-                if(Steps[CurrentOperation].Operation == Operations.Switch)
+                if (Steps[CurrentOperation].Operation == Operations.Switch)
                 {
                     ReswitchItems(Steps[CurrentOperation].Indexes);
                 }
@@ -132,6 +142,38 @@ namespace lab4_wpf
             int second = indexes[1];
             (Data[second], Data[first]) = (Data[first], Data[second]);
             Array.Items.Refresh();
+        }
+
+        private async void Start_Click(object sender, RoutedEventArgs e)
+        {
+            while (true)
+            {
+                if (CurrentOperation != Steps.Count && !Pause)
+                {
+                    NextStep(null, null);
+                }
+
+                await Task.Delay(int.Parse(Delay.Text));
+
+                if (Stop)
+                {
+                    break;
+                }
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Pause = !Pause;
+        }
+
+        private void ClearWindow(object sender, CancelEventArgs e)
+        {
+            Stop = true;
+            Steps.Clear();
+            Data.Clear();
+            DataForSort.Clear();
+            CurrentOperation = 0;
         }
     }
 }

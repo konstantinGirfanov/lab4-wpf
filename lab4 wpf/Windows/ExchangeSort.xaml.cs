@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,6 +27,8 @@ namespace lab4_wpf.Windows
         private static ObservableCollection<Value> Data = new();
         private static int CurrentOperation = 0;
         private static List<int> DataForSort = new();
+        private static bool Pause { get; set; } = false;
+        private static bool Stop { get; set; } = false;
 
         public ExchangeSort()
         {
@@ -98,6 +102,7 @@ namespace lab4_wpf.Windows
 
         private void EnterData(object sender, RoutedEventArgs e)
         {
+            Stop = false;
             DescList.Items.Clear();
             CurrentOperation = 0;
             Data.Clear();
@@ -136,6 +141,38 @@ namespace lab4_wpf.Windows
             int second = indexes[1];
             (Data[second], Data[first]) = (Data[first], Data[second]);
             Array.Items.Refresh();
+        }
+
+        private async void Start_Click(object sender, RoutedEventArgs e)
+        {
+            while (true)
+            {
+                if (CurrentOperation != Steps.Count && !Pause)
+                {
+                    NextStep(null, null);
+                }
+
+                await Task.Delay(int.Parse(Delay.Text));
+
+                if (Stop)
+                {
+                    break;
+                }
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Pause = !Pause;
+        }
+
+        private void ClearWindow(object sender, CancelEventArgs e)
+        {
+            Stop = true;
+            Steps.Clear();
+            Data.Clear();
+            DataForSort.Clear();
+            CurrentOperation = 0;
         }
     }
 }

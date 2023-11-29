@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,6 +29,10 @@ namespace lab4_wpf.Windows
         private static int CurrentOperation = 0;
         private static List<int> DataForSort = new();
         private static List<ObservableCollection<Value>> TempData = new() { new ObservableCollection<Value>(), new ObservableCollection<Value>() };
+        private static bool Pause { get; set; } = false;
+        private static Stack<Value>? PreviousValues { get; set; } = new();
+        private static Stack<ObservableCollection<Value>>? PreviousTempArrays = new();
+        private static bool Stop { get; set; } = false;
         public NaturalSortWindow()
         {
             InitializeComponent();
@@ -127,15 +133,6 @@ namespace lab4_wpf.Windows
             }
         }
 
-        /*private void SwitchItems(int[] indexes)
-        {
-            int first = indexes[0];
-            int second = indexes[1];
-            (Data[second], Data[first]) = (Data[first], Data[second]);
-            Array.Items.Refresh();
-            SelectItems(indexes);
-        }*/
-
         private void WriteToTemp(SwapDataInformation info)
         {
             foreach (DataGrid grid in dataGrids.Items)
@@ -146,15 +143,17 @@ namespace lab4_wpf.Windows
             {
                 foreach (ObservableCollection<Value> tempArray in TempData)
                 {
+                    var copy = new ObservableCollection<Value>();
+                    foreach (Value value in tempArray)
+                    {
+                        copy.Add(value);
+                    }
+                    PreviousTempArrays.Push(copy);
+
                     tempArray.Clear();
                 }
             }
 
-
-            /*foreach (ObservableCollection<Value> tempArray in TempData)
-            {
-                tempArray.Clear();
-            }*/
 
             SelectItems(new int[1] { info.SourceIndex }, 0);
             TempData[info.SourceFileNumber - 1].Add(info.Data);
@@ -169,6 +168,7 @@ namespace lab4_wpf.Windows
             }
 
             SelectItems(new int[1] { info.SourceIndex }, info.SourceFileNumber);
+            PreviousValues.Push(Data[info.DestinationIndex]);
             Data[info.DestinationIndex] = info.Data;
             SelectItems(new int[1] { info.DestinationIndex }, 0);
         }
@@ -187,6 +187,7 @@ namespace lab4_wpf.Windows
         }
         private void EnterData(object sender, RoutedEventArgs e)
         {
+            Stop = false;
             DescList.Items.Clear();
             CurrentOperation = 0;
             Data.Clear();
@@ -209,21 +210,128 @@ namespace lab4_wpf.Windows
             if (CurrentOperation - 1 != 0)
             {
                 CurrentOperation--;
-                if (Steps[CurrentOperation].Operation == Operations.Switch)
+                if (Steps[CurrentOperation].Operation == Operations.WriteToTemp)
                 {
-                    ReswitchItems(Steps[CurrentOperation].Indexes);
+                    Step currentStep = Steps[CurrentOperation];
+                    int tempFile = currentStep.DataInfo.SourceFileNumber - 1;
+                    TempData[tempFile].RemoveAt(TempData[tempFile].Count - 1);
+
                 }
+                else if (Steps[CurrentOperation].Operation == Operations.WriteFromTemp)
+                {
+                    foreach (DataGrid grid in dataGrids.Items)
+                    {
+                        grid?.SelectedCells.Clear();
+                    }
+
+                    Step currentStep = Steps[CurrentOperation];
+                    Data[currentStep.DataInfo.DestinationIndex] = PreviousValues.Pop();
+                    Array.SelectedCells.Clear();
+                    Array.Items.Refresh();
+                }
+                else if (Steps[CurrentOperation].Operation == Operations.SelectInTemp)
+                {
+                    foreach (DataGrid grid in dataGrids.Items)
+                    {
+                        grid?.SelectedCells.Clear();
+                    }
+                    Array.SelectedCells.Clear();
+                }
+                else if (Steps[CurrentOperation].Operation == Operations.Select)
+                {
+                    SelectItems(Steps[CurrentOperation].Indexes, 0);
+                }
+                else if (//Regex.IsMatch(Steps[CurrentOperation].StepDecription, @"Длина сегментов(\w*)") ||
+                    Regex.IsMatch(Steps[CurrentOperation].StepDecription, @"Слияние(\w*)"))
+                {
+                    if (PreviousTempArrays.Count > 0)
+                    {
+                        TempData[1] = PreviousTempArrays.Pop();
+                        TempData[0] = PreviousTempArrays.Pop();
+                        TempArray.ItemsSource = TempData[0];
+                        TempArray1.ItemsSource = TempData[1];
+                    }
+
+                }
+
+
+                if (CurrentOperation - 1 != 0)
+                {
+                    if (Steps[CurrentOperation - 1].Operation == Operations.SelectInTemp)
+                    {
+                        Step prevStep = Steps[CurrentOperation - 1];
+                        SelectInTemp(prevStep.SelectInfo);
+                    }
+                    else if (Steps[CurrentOperation - 1].Operation == Operations.WriteFromTemp)
+                    {
+                        Array.SelectedCells.Clear();
+                        var info = Steps[CurrentOperation - 1].DataInfo;
+                        SelectItems(new int[1] { info.SourceIndex }, info.SourceFileNumber);
+                        SelectItems(new int[1] { info.DestinationIndex }, 0);
+                    }
+                    else if (Steps[CurrentOperation - 1].Operation == Operations.WriteToTemp)
+                    {
+                        Array.SelectedCells.Clear();
+                        Step prevStep = Steps[CurrentOperation - 1];
+                        var info = prevStep.DataInfo;
+                        SelectItems(new int[1] { info.SourceIndex }, 0);
+                        SelectItems(new int[1] { info.DestinationIndex }, info.SourceFileNumber);
+                    }
+                    else if (Steps[CurrentOperation - 1].Operation == Operations.Select)
+                    {
+                        Step prevStep = Steps[CurrentOperation - 1];
+                        SelectItems(prevStep.Indexes, 0);
+                    }
+                    else if (Steps[CurrentOperation - 1].Operation == Operations.None)
+                    {
+                        Array.SelectedCells.Clear();
+                        foreach (DataGrid grid in dataGrids.Items)
+                        {
+                            grid?.SelectedCells.Clear();
+                        }
+                    }
+                }
+
                 DescList.Items.RemoveAt(DescList.Items.Count - 1);
-                SelectItems(Steps[CurrentOperation - 1].Indexes, 0);
             }
         }
 
-        private void ReswitchItems(int[] indexes)
+        private async void Start_Click(object sender, RoutedEventArgs e)
         {
-            int first = indexes[0];
-            int second = indexes[1];
-            (Data[second], Data[first]) = (Data[first], Data[second]);
-            Array.Items.Refresh();
+            while (true)
+            {
+                if (CurrentOperation != Steps.Count && !Pause)
+                {
+                    NextStep(null, null);
+                }
+
+                await Task.Delay(int.Parse(Delay.Text));
+
+                if (Stop)
+                {
+                    break;
+                }
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Pause = !Pause;
+        }
+
+        private void ClearWindow(object sender, CancelEventArgs e)
+        {
+            Stop = true;
+            Steps.Clear();
+            Data.Clear();
+            DataForSort.Clear();
+            CurrentOperation = 0;
+            PreviousTempArrays.Clear();
+            PreviousValues.Clear();
+            foreach(var temp in TempData)
+            {
+                temp.Clear();
+            }
         }
     }
 }
