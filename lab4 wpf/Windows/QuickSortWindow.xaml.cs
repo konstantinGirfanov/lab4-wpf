@@ -1,9 +1,11 @@
-﻿using System;
+﻿using lab4_wpf.Steps_classes;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,11 +25,12 @@ namespace lab4_wpf.Windows
     public partial class QuickSortWindow : Window
     {
         private static List<Step> Steps = new();
-        private static ObservableCollection<Value> Data = new();
+        private static ObservableCollection<ValueQuickSort> Data = new();
         private static int CurrentOperation = 0;
         private static List<int> DataForSort = new();
         private static bool Pause { get; set; } = false;
         private static bool Stop { get; set; } = false;
+        private static int[] CurrentArray { get; set; } = System.Array.Empty<int>();
 
         public QuickSortWindow()
         {
@@ -65,6 +68,12 @@ namespace lab4_wpf.Windows
         private void DoAction(Step step)
         {
             DescList.Items.Add(step.StepDecription);
+            if (Regex.IsMatch(step.StepDecription, @"Начинается поиск разделителя для под массива(\w*)"))
+            {
+
+                CurrentArray = CreateIndexes(step.Left, step.Right);
+            }
+
             switch (step.Operation)
             {
                 case Operations.Select:
@@ -79,6 +88,17 @@ namespace lab4_wpf.Windows
                     Array.Items.Refresh();
                     break;
             }
+            SelectCurrentArray(CurrentArray);
+        }
+
+        private static int[] CreateIndexes(int left, int right)
+        {
+            int[] result = new int[right - left + 1];
+            for (int i = 0; i < right - left + 1; i++)
+            {
+                result[i] = i + left;
+            }
+            return result;
         }
 
         private void SelectItems(int[] indexes)
@@ -87,6 +107,20 @@ namespace lab4_wpf.Windows
             foreach (int index in indexes)
             {
                 DataGridCellInfo newCell = new(Array.Items[index], Array.Columns[1]);
+                newCell.Column.CellStyle = (Style)Resources["DataGridCellStyle1"];
+                if (!Array.SelectedCells.Contains(newCell))
+                {
+                    Array.SelectedCells.Add(newCell);
+                }
+            }
+        }
+
+        private void SelectCurrentArray(int[] indexes)
+        {
+            foreach(int index in indexes)
+            {
+                DataGridCellInfo newCell = new(Array.Items[index], Array.Columns[2]);
+                newCell.Column.CellStyle = (Style)Resources["DataGridCellStyle2"];
                 if (!Array.SelectedCells.Contains(newCell))
                 {
                     Array.SelectedCells.Add(newCell);
@@ -117,7 +151,7 @@ namespace lab4_wpf.Windows
                 if (int.TryParse(data[i], out int value))
                 {
                     DataForSort.Add(value);
-                    Data.Add(new Value(value.ToString(), value.ToString()));
+                    Data.Add(new ValueQuickSort(value.ToString(), value.ToString()));
                 }
             }
 

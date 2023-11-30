@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Documents;
+using System.Windows.Markup.Localizer;
 using System.Windows.Media.Media3D;
 
 namespace lab4_wpf;
@@ -73,8 +74,11 @@ public static class InnerSorts
     {
         if (left < right)
         {
-            Steps.Add(new Step($"Начинается поиск разделителя для под массива: array[{left}:{right}].",
-                CreateIndexes(left, right), Operations.Select, null));
+            Step step = new Step($"Начинается поиск разделителя для под массива: array[{left}:{right}].",
+                CreateIndexes(left, right), Operations.Select, null);
+            step.Left = left;
+            step.Right = right;
+            Steps.Add(step);
 
             var pivotIndex = collection.Partition(left, right);
             collection.InsideQuickSort(left, pivotIndex);

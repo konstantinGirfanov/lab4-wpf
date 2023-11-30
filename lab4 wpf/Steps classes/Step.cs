@@ -13,6 +13,9 @@ namespace lab4_wpf
         public Operations Operation {  get; set; }
         public SwapDataInformation? DataInfo { get; set; }
         public List<SelectInfo>? SelectInfo { get; set; }
+        public int Left {  get; set; }
+        public int Right {  get; set; }
+
         public Step(string StepDesc, int[] Ind, Operations op, SwapDataInformation info)
         {
             StepDecription = StepDesc;
